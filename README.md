@@ -44,24 +44,25 @@ This project automates the monitoring and journaling of perpetual futures tradin
 | Node.js | Code execution in n8n |
 
 ## 🏗️ Architecture
-Hyperliquid API
-↓
-n8n Workflow Engine (Docker, Armbian STB)
-↓
-┌───────────────────────────────────┐
-│         Price Alert Workflow       │
-│  Schedule → HTTP → Code → IF      │
-│       ↓              ↓            │
-│   Telegram      Google Sheets     │
-└───────────────────────────────────┘
-↓
-┌───────────────────────────────────┐
-│         PNL Tracker Workflow       │
-│  Schedule → HTTP → Code → IF      │
-│                    ↓              │
-│                Telegram           │
-└───────────────────────────────────┘
 
+```mermaid
+flowchart TD
+    A[Hyperliquid API] --> B[n8n Workflow Engine\nDocker on Armbian STB]
+    
+    B --> C[Price Alert Workflow\nEvery 5 minutes]
+    B --> D[PNL Tracker Workflow\nEvery 15 minutes]
+    
+    C --> E{Has Alert?}
+    E -->|Yes| F[Telegram Notification]
+    E -->|Yes| G[Google Sheets Journal]
+    E -->|No| H[Skip]
+    
+    D --> I{Has Position?}
+    I -->|Yes| J[Telegram PNL Update]
+    I -->|No| K[Skip]
+    
+    G --> L[Dashboard\nCharts & Metrics]
+```
 ## 📁 Workflow Structure
 
 ### Workflow 1: Hyperliquid Price Alert
